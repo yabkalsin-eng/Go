@@ -1,0 +1,36 @@
+body {
+  font-family: Arial;
+  background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+  margin: 0;
+}
+.continer {
+  width: 90%;
+  max-width: 500px;
+  margin: 100px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+}
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+#btn {
+  background: #5a67d8;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.power {
+  text-align: center;
+  padding: 15px;
+  background: #f0f0f0;
+  color: #555;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        select, textarea, input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            resize: none;
+        }
+        button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        #messages {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+        .message {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Admin Panel</h2>
+    
+    <input type="password" id="adminKey" placeholder="Enter Admin Password">
+    <button onclick="loginAdmin()">Login</button>
+
+    <div id="adminControls" style="display: none;">
+        <h3>Edit/Delete Messages</h3>
+        <select id="adminChatRoom">
+            <option value="general">General</option>
+            <option value="tech">Tech</option>
+            <option value="fun">Fun</option>
+        </select>
+        <div id="adminMessages"></div>
+    </div>
+
+    <script>
+        // Firebase Configuration (Same as in index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_-jwjVy6FgrpEveXdGmp_IKMebKDo0ME",
+            authDomain: "webapp-f18d7.firebaseapp.com",
+            databaseURL: "https://webapp-f18d7-default-rtdb.firebaseio.com/",
+            projectId: "webapp-f18d7",
+            storageBucket: "webapp-f18d7.firebasestorage.app",
+            messagingSenderId: "17542691325",
+            appId: "1:17542691325:web:b6f4db2b4fe04ae0c98194",
+            measurementId: "G-YYSQJ7T56L"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Constants
+        const adminKeyInput = document.getElementById("adminKey");
+        const adminControls = document.getElementById("adminControls");
+        const adminChatRoom = document.getElementById("adminChatRoom");
+        const adminMessagesDiv = document.getElementById("adminMessages");
+
+        // Admin Password
+        const ADMIN_PASSWORD = "pass1@1@1@";
+
+        // Event Listeners
+        adminChatRoom.addEventListener("change", displayAdminMessages);
+
+        // Functions
+        function loginAdmin() {
+            const enteredPassword = adminKeyInput.value.trim();
+            if (enteredPassword === ADMIN_PASSWORD) {
+                adminControls.style.display = "block";
+                adminKeyInput.value = ""; // Clear input
+                displayAdminMessages();
+            } else {
+                alert("Incorrect Admin Password!");
+            }
+        }
+
+        function displayAdminMessages() {
+            const room = adminChatRoom.value;
+            adminMessagesDiv.innerHTML = "";
+
+            // Fetch messages from Firebase
+            database.ref(`messages/${room}`).on("value", (snapshot) => {
+                const messages = [];
+                snapshot.forEach((childSnapshot) => {
+                    messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+
+                // Display messages
+                messages.forEach((msg, index) => {
+                    const messageDiv = document.createElement("div");
+                    messageDiv.className = "message";
+                    messageDiv.innerHTML = `
+                        <p><b>Message ${index + 1}</b></p>
+                        <textarea id="editMessage${index}" rows="2">${msg.text}</textarea>
+                        <br>
+                        <button onclick="editMessage('${room}', '${msg.id}', ${index})">Edit</button>
+                        <button onclick="deleteMessage('${room}', '${msg.id}')">Delete</button>
+                    `;
+                    adminMessagesDiv.appendChild(messageDiv);
+                });
+            });
+        }
+
+        function editMessage(room, messageId, index) {
+            const newText = document.getElementById(`editMessage${index}`).value.trim();
+            if (!newText) {
+                alert("Message cannot be empty!");
+                return;
+            }
+
+            // Update message in Firebase
+            database.ref(`messages/${room}/${messageId}`).update({ text: newText });
+        }
+
+        function deleteMessage(room, messageId) {
+            // Delete message from Firebase
+            database.ref(`messages/${room}/${messageId}`).remove();
+        }
+    </script>
+
+</body>
+</html>
